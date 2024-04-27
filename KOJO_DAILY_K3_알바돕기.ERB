@@ -1,0 +1,127 @@
+﻿;=====================================================
+; 몰루K 데일리 구상 - 데일리 이름
+; 구상 제작자 : 길고양이
+; 구상 조건 : 세리카가 플레이와 같은 소속+포로가 아닐때.
+; 구상 설명 :
+;
+;       1.알바를 하고있는 세리카를 플레이어가 만난다는 느낌
+;       2.TW의 일돕기 커맨드를 조금더 구체화 시칸거라고 생각하면 편할지도?
+;       3.아마 호감도가 낮은 초반에는 이 데일리를 우선적으로 사용알 생각.
+;세리카 전용색 설정 57 57 86
+;세리카 대체색 87,87,134
+;=====================================================
+;---------------------
+;기본적인 발생 확률(1000분 율 100으로 10%)
+;기본적으로 발생할 확률임 DECISION함수로 추가 조건을 설정할 수 있음
+;---------------------
+@KOJO_DAILY_K3_SERIKA_PTJ_RATE(대상)
+#DIM 대상
+;디버깅용으로 100%로 설정 정상 작동하는것 확인 후 정상적인 확률로 내릴 것
+RETURN 1000
+
+;---------------------
+;확률 이외의 발생 판정
+;---------------------
+@KOJO_DAILY_K3_SERIKA_PTJ_DECISION(대상)
+#DIM 대상
+RETURN CHECK_KOJO_DAILY_HAPPEN(대상, 1, 0, 1)
+;---------------------
+;장르
+;---------------------
+@KOJO_DAILY_K3_SERIKA_PTJ_GENRE(대상)
+#DIM 대상
+RETURN 데일리_장르_에로
+
+;---------------------
+;본체
+;---------------------
+@KOJO_DAILY_K3_SERIKA_PTJ(대상)
+#DIM 대상
+
+IF TALENT:MASTER:선생 == 1
+	LOCALS:0 = 선생님
+ELSE
+	LOCALS:0 = %ANAME(MASTER)%
+ENDIF
+;첫번째 알바 대면시
+IF KDVAR:대상:알바_대면==0
+    PRINTFORMW 시내를 아무생각없이 돌아다니던중, 한 가게의 창가 너머로 익숙한 얼굴을 발견했다.
+    PRINTL
+    CALL FACE_IMAGE_N("표정_3_일반_19")
+    ;웃는 얼굴
+    SETCOLOR 87,87,134
+    PRINTFORML 「감사합니다 또오세요!」
+    RESETCOLOR
+    PRINTFORMW 그렇게 고객에게 인사한 세리카는 손으로 땀을 훔치고 다시 접객받기 시작했다.
+    PRINTFORML ...바쁜것 같은데 어떻게 할까.
+    CALL ASK_YN("들어간다","지나친다")
+    IF RESULT==1
+        PRINTFORML 바쁜것같고, 방해하는것도 좋지 않겠지.
+        PRINTFORMW %조사처리(ANAME(MASTER),"은")% 그대로 갈길을 갔다.
+    ELSEIF RESULT==0
+        PRINTFORML 뭔가 도울일이 있을까 싶어, 문을 열고 들어갔다.
+        SETCOLOR 87,87,134
+        CALL FACE_IMAGE_N("표정_3_일반_20")
+        PRINTFORMW 「어서오세요! 시바세키라멘...」
+        IF TALENT:MASTER:선생==1
+            PRINTFORMW 「어라 선생님? 지금 바쁜거 아니었어?」
+        ELSE
+            PRINTFORMW  「%LOCALS:0%? 뭐 하나 먹으려고?」
+        ENDIF
+        RESETCOLOR
+        CALL ASK_MULTI("세리카가 좀 바빠보여서")
+        SETCOLOR 87,87,134
+        ; MULTI로 한 이유=추후 라멘 시캬먹는 장면 추가용
+        IF RESULT==0
+            PRINTFORMW 「으윽, 솔직히 고양이손이라도 빌리고 싶을 심정인데...」
+            PRINTFORMW 「.... %LOCALS:0%, 혹시 알바 해볼 생각없어?」
+            IF TALENT:MASTER:선생==1
+            CALL FACE_IMAGE_N("표정_3_일반_27")
+                PRINTFORMW 「물론, 선생님이 바쁜건 알아, 그러니까 거절해도 상관은 없는데...」
+                RESETCOLOR
+                PRINTFORML 거절시, 알바돕기 데일리 이벤트가 나타나지 않습니다.
+                PRINTFORMW 되돌릴 수 없으니 신중히 선택해 주세요.
+                PRINTL
+                CALL ASK_YN("학생을 돕는게 어른이니까.","미안 사무가 너무...")
+                SETCOLOR 87,87,134
+                IF RESULT==1
+                    PRINTFORMW 「아하하...역시 선생님은 바쁘구나...」
+                    PRINTFORMW 「내 제안은 잊어줘 선생님.」
+                    KDVAR:대상:세리카_알바_진행도= -1
+                ELSEIF RESULT==0
+                    CALL FACE_IMAGE_N("표정_3_일반_25")
+                    PRINTFORMW 「진짜? 고마워 선생님! 잠깐만 사장님 모시고 올게!!」
+                    RESETCOLOR
+                    PRINTFORML 「그렇게 점심시간, 짬짬히 세리카와 함께 시바세키 라면에서」
+                    PRINTFORMW 「알바를 하기로 했다.」
+                    ;호감도 및 여러 변수 추가란
+                    KDVAR:대상:세리카_알바_진행도=1
+                ENDIF
+            ELSE
+                CALL FACE_IMAGE_N("표정_3_일반_16")
+                PRINTFORMW 「물론, 도와준다면 알바비는 나오게 될꺼야! 아마 도움이 될걸?」
+                PRINTFORMW 「...나도 좀 편해지긴 할꺼고」
+                RESETCOLOR
+                PRINTFORML 거절시, 알바돕기 데일리 이벤트가 나타나지 않습니다.
+                PRINTFORML 되돌릴 수 없으니 신중히 선택해 주세요.
+                CALL ASK_YN("고양이 손이라도 필요하다면야","미안, 좀 바빠서..")
+                SETCOLOR 87,87,134
+                IF RESULT==1
+                    PRINTFORMW 「아하하, 미안.. 조금 무리한 부탁이었나보네..」
+                    PRINTFORMW 「내 제안은 잊어줘, 미안해 %ANAME(MASTER)%..」
+                    KDVAAR:대상:세리카_알바_진행도=-1
+                ELSEIF RESULT==0
+                    CALL FACE_IMAGE_N("표정_3_일반_25")
+                    PRINTFORMW 「진짜? 고마워! 걱정마, 시급은 확실히 나올꺼니까!」
+                    PRINTL
+                    RESETCOLOR
+                    PRINTFORML 그렇게 점심시간에 시바세키라멘으로 나와
+                    PRINTFORML 세리카와 같이 알바하기로 결심했다.
+                    ;호감도 및 여러 변수 추가란
+                    KDVAR:대상:세리카_알바_진행도=1
+                ENDIF
+            ENDIF
+        ENDIF
+    ENDIF
+ENDIF
+RETURN 1
